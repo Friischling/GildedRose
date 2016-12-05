@@ -77,5 +77,122 @@ namespace GildedRose.Tests
 
 
         }
+
+
+        [Fact]
+        public void TestThatQualityDegradesTwiceAsFastOnceSellInIsPassed()
+        {
+            // Initial state
+            var vest = sut.Items.Single(n => n.Name.Equals("+5 Dexterity Vest")); // Fails if no such item is present or multiple instances
+            Assert.Equal(10, vest.SellIn); // Copying values instead of referencing back to original list gives better readability
+            Assert.Equal(20, vest.Quality);
+          
+            // Act
+            Enumerable.Range(0,10).ForEach(i=>sut.UpdateQuality()); // At the end of each day our system lowers both values for every item
+            Assert.Equal(0, vest.SellIn); // Basic Item with no special handling
+            Assert.Equal(10, vest.Quality);
+
+            sut.UpdateQuality();
+            Assert.Equal(-1, vest.SellIn); 
+            Assert.Equal(8, vest.Quality); // Twice as fast, 2 per day
+
+            sut.UpdateQuality();
+            Assert.Equal(-2, vest.SellIn);
+            Assert.Equal(6, vest.Quality); // Twice as fast, 2 per day
+
+        }
+
+        [Fact]
+        public void TestThatTheQualityOfAnItemIsNeverNegative()
+        {
+            // Get initial state
+            var elixir = sut.Items.Single(n => n.Name.Equals("Elixir of the Mongoose"));
+            Assert.Equal(5, elixir.SellIn);
+            Assert.Equal(7, elixir.Quality);
+
+            //Act -  Excercise system 
+            Enumerable.Range(0,50).ForEach(i=>sut.UpdateQuality());
+            Assert.Equal(0,elixir.Quality);
+
+
+        }
+        [Fact]
+        public void TestThatTheQualityOfAnItemIsNeverAbove50()
+        {
+            // Get initial state
+            var brie = sut.Items.Single(n => n.Name.Equals("Aged Brie"));
+            Assert.Equal(2, brie.SellIn);
+            Assert.Equal(0, brie.Quality);
+
+            //Act -  Excercise system 
+            Enumerable.Range(0, 100).ForEach(i => sut.UpdateQuality());
+            Assert.Equal(50, brie.Quality);
+        }
+
+
+        [Fact]
+        public void TestThatAgedBrieActuallyIncreasesInQualityTheOlderItGets()
+        {
+            // Get initial state
+            var brie = sut.Items.Single(n => n.Name.Equals("Aged Brie"));
+            Assert.Equal(2, brie.SellIn);
+            Assert.Equal(0, brie.Quality);
+
+            //Act -  Excercise system 
+            Enumerable.Range(0, 10).ForEach(i => sut.UpdateQuality());  // Is there a bug in the code ? 
+            Assert.Equal(10, brie.Quality);
+
+            Enumerable.Range(0, 10).ForEach(i => sut.UpdateQuality());
+            Assert.Equal(20, brie.Quality);
+
+        }
+
+        [Fact]
+        public void TestThatSulfurasBeingALegendaryItemNeverHasToBeSoldOrDecreasesInQuality()
+        {
+            var sulfuras = sut.Items.Single(n => n.Name.Equals("Sulfuras, Hand of Ragnaros"));
+            Assert.Equal(0, sulfuras.SellIn);
+            Assert.Equal(80, sulfuras.Quality);
+
+            Enumerable.Range(0,34).ForEach(i=>sut.UpdateQuality());
+            Assert.Equal(0, sulfuras.SellIn);
+            Assert.Equal(80, sulfuras.Quality);
+
+
+        }
+        [Fact]
+        public void TestThatBackstagePassesIncreaseInQualityTheCloseWeGetToSellInButDropsTo0AfterSellIn()
+        {
+            var backstagepasses = sut.Items.Single(n => n.Name.Equals("Backstage passes to a TAFKAL80ETC concert"));
+            Assert.Equal(15, backstagepasses.SellIn);
+            Assert.Equal(20, backstagepasses.Quality);
+
+            // "Backstage passes", like aged brie, increases in Quality as it's SellIn value approaches; Quality increases by 2 when there are 10 days or less and by 3 when there are 5 days or less but Quality drops to 0 after the concert
+            Enumerable.Range(0,5).ForEach(i=> sut.UpdateQuality());
+            Assert.Equal(10, backstagepasses.SellIn);
+            Assert.Equal(25, backstagepasses.Quality);
+
+            sut.UpdateQuality();
+            Assert.Equal(9, backstagepasses.SellIn);
+            Assert.Equal(27, backstagepasses.Quality);
+
+            Enumerable.Range(0,4).ForEach(i=>sut.UpdateQuality());
+            Assert.Equal(5, backstagepasses.SellIn);
+            Assert.Equal(35, backstagepasses.Quality);
+
+            sut.UpdateQuality();
+            Assert.Equal(4, backstagepasses.SellIn);
+            Assert.Equal(38, backstagepasses.Quality);
+
+            Enumerable.Range(0, 4).ForEach(i => sut.UpdateQuality());
+            Assert.Equal(0, backstagepasses.SellIn);
+            Assert.Equal(50, backstagepasses.Quality);
+
+            sut.UpdateQuality();
+            Assert.Equal(-1, backstagepasses.SellIn);
+            Assert.Equal(0, backstagepasses.Quality);
+
+
+        }
     }
 }

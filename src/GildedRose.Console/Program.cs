@@ -56,8 +56,20 @@ namespace GildedRose.Console
             var backstagePasses = UpdateQualityAndSellInForBackstagePasses(
                                     stockedItems.Where(s=>s.Rule==BusinessRule.BackstagePassesAndSimilar).Select(s=>s.Item).ToList());
 
-            Items = defaultHandling.Concat(legendaryItems).Concat(agedGoods).Concat(backstagePasses).ToList();
+            var conjuredItems =
+                UpdateQualityForConjuredItems(
+                    UpdateSellInForItems(stockedItems.Where(s => s.Rule == BusinessRule.ConjuredItems).Select(s=>s.Item).ToList()));
 
+            Items = defaultHandling.Concat(legendaryItems).Concat(agedGoods).Concat(backstagePasses).Concat(conjuredItems).ToList();
+
+        }
+
+        private List<Item> UpdateQualityForConjuredItems(List<Item> items)
+        {
+            // Let's reuse standard Quality degradation method here
+            // Of course this could be written using some LINQ, but the "Twice as fast as normal items" rule used in documentation is interesting.
+            return UpdateQualityForItems(
+                UpdateQualityForItems(items));
         }
 
         private List<Item> UpdateQualityAndSellInForBackstagePasses(List<Item> items)
@@ -117,6 +129,9 @@ namespace GildedRose.Console
                     case "Sulfuras, Hand of Ragnaros":
                         rule = BusinessRule.LegendaryStuff;
                         break;
+                    case "Conjured Mana Cake":
+                        rule = BusinessRule.ConjuredItems;
+                        break;
                     default:
                         rule = BusinessRule.NoSpecialHandling;
                         break;
@@ -174,7 +189,8 @@ namespace GildedRose.Console
             NoSpecialHandling,
             AgedGoods,
             BackstagePassesAndSimilar,
-            LegendaryStuff
+            LegendaryStuff,
+            ConjuredItems
         }
 
     }

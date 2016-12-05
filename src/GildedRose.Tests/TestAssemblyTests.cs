@@ -79,7 +79,7 @@ namespace GildedRose.Tests
 
             conjuredmanacake = sut.Items.Single(n => n.Name.Equals("Conjured Mana Cake"));
             Assert.Equal(2, conjuredmanacake.SellIn); // Original code implemented here - no special handling
-            Assert.Equal(5, conjuredmanacake.Quality);
+            Assert.Equal(4, conjuredmanacake.Quality);
 
 
         }
@@ -213,5 +213,43 @@ namespace GildedRose.Tests
 
 
         }
+
+
+        [Fact]
+        public void TestThatConjuredItemsAreDegradingTwiceAsFast() // "Conjured" items degrade in Quality twice as fast as normal items
+        {
+            var conjured = sut.Items.Single(n=>n.Name.Equals("Conjured Mana Cake"));
+            Assert.Equal(3, conjured.SellIn);
+            Assert.Equal(6,conjured.Quality);
+
+            sut.UpdateQuality();
+            conjured = sut.Items.Single(n => n.Name.Equals("Conjured Mana Cake"));
+            Assert.Equal(2, conjured.SellIn);
+            Assert.Equal(4, conjured.Quality);
+
+            sut.UpdateQuality();
+            conjured = sut.Items.Single(n => n.Name.Equals("Conjured Mana Cake"));
+            Assert.Equal(1, conjured.SellIn);
+            Assert.Equal(2, conjured.Quality);
+
+            sut.UpdateQuality();
+            conjured = sut.Items.Single(n => n.Name.Equals("Conjured Mana Cake"));
+            Assert.Equal(0, conjured.SellIn);
+            Assert.Equal(0, conjured.Quality);
+
+            sut.UpdateQuality();
+            conjured = sut.Items.Single(n => n.Name.Equals("Conjured Mana Cake"));
+            Assert.Equal(-1, conjured.SellIn);
+            Assert.Equal(0, conjured.Quality);
+
+            sut.UpdateQuality();
+            conjured = sut.Items.Single(n => n.Name.Equals("Conjured Mana Cake"));
+            Assert.Equal(-2, conjured.SellIn);
+            Assert.Equal(0, conjured.Quality);
+
+        }
+
+
+        
     }
 }

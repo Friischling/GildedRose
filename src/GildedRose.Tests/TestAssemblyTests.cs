@@ -79,7 +79,7 @@ namespace GildedRose.Tests
 
             conjuredmanacake = sut.Items.Single(n => n.Name.Equals("Conjured Mana Cake"));
             Assert.Equal(2, conjuredmanacake.SellIn); // Original code implemented here - no special handling
-            Assert.Equal(4, conjuredmanacake.Quality);
+            Assert.Equal(4, conjuredmanacake.Quality); // 5 for original code, 4 with modifications
 
 
         }
@@ -152,11 +152,19 @@ namespace GildedRose.Tests
             //Act -  Excercise system 
             Enumerable.Range(0, 10).ForEach(i => sut.UpdateQuality());  // Is there a bug in the code ? 
             brie = sut.Items.Single(n => n.Name.Equals("Aged Brie"));
-            Assert.Equal(10, brie.Quality);
+            Assert.Equal(18, brie.Quality);
+            Assert.Equal(-8, brie.SellIn);
 
             Enumerable.Range(0, 10).ForEach(i => sut.UpdateQuality());
             brie = sut.Items.Single(n => n.Name.Equals("Aged Brie"));
-            Assert.Equal(20, brie.Quality);
+            Assert.Equal(38, brie.Quality);
+            Assert.Equal(-18, brie.SellIn);
+
+            Enumerable.Range(0, 10).ForEach(i => sut.UpdateQuality());
+            brie = sut.Items.Single(n => n.Name.Equals("Aged Brie"));
+            Assert.Equal(50, brie.Quality);
+            Assert.Equal(-28, brie.SellIn);
+
         }
 
         [Fact]
@@ -216,6 +224,7 @@ namespace GildedRose.Tests
 
 
         [Fact]
+
         public void TestThatConjuredItemsAreDegradingTwiceAsFast() // "Conjured" items degrade in Quality twice as fast as normal items
         {
             var conjured = sut.Items.Single(n=>n.Name.Equals("Conjured Mana Cake"));
